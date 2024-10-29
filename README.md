@@ -26,6 +26,6 @@
 3. Run tests:
 
    ```bash
-   mvn test
+   npm test
    ```
 
