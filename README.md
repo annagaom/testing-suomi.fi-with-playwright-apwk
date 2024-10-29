@@ -27,9 +27,13 @@ git clone http://
    ```bash
    npm install
    ```
-4. Run test:
-
+4. To run the tests,:
    ```bash
    npm test
+   ```
+5. start appllication:
+
+   ```bash
+   npm start
    ```
 
