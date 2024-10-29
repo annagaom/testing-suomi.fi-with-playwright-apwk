@@ -1,0 +1,7 @@
+{
+  "name": "playwright-java-project",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "mvn test"
+  }
+}
