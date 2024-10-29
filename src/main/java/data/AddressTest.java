@@ -3,8 +3,8 @@ package data;
 import com.microsoft.playwright.*;
 import com.microsoft.playwright.options.LoadState;
 
-public class AddressChecker {
-    public static void main(String[] args) {
+public class AddressTest {
+    public void runTests() {
         try (Playwright playwright = Playwright.create()) {
             Browser browser = playwright.firefox().launch(new BrowserType.LaunchOptions().setHeadless(false)); // Set to false for debugging
             Page page = browser.newPage();
@@ -32,6 +32,7 @@ public class AddressChecker {
 
                 // Capture the address text
                 address = page.locator("div.ptv-highlight-box > div > div:nth-child(1) > p").innerText();
+                System.out.println(" " );
                 System.out.println("Extracted Address: " + address);
             } catch (TimeoutError e) {
                 System.out.println("Could not find the address element within the timeout.");
@@ -55,6 +56,7 @@ public class AddressChecker {
             // Check if the result is not empty
             if (!result.isEmpty()) {
                 System.out.println("Address validation successful.");
+                System.out.println(" " );
             } else {
                 System.out.println("Address validation failed.");
             }
