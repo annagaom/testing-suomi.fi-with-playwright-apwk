@@ -4,7 +4,22 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "mvn exec:java -Dexec.mainClass=\"data.App\"",
     "test": "mvn test"
-  }
-
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/annagaom/testing-suomi.fi-with-playwright-apwk.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "playwright": "^1.34.0"
+  },
+  "bugs": {
+    "url": "https://github.com/annagaom/testing-suomi.fi-with-playwright-apwk.git"
+  },
+  "homepage": "https://github.com/annagaom/testing-suomi.fi-with-playwright-apwk.git#readme"
 }
+

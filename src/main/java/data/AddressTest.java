@@ -3,65 +3,47 @@ package data;
 import com.microsoft.playwright.*;
 import com.microsoft.playwright.options.LoadState;
 
+import java.nio.file.Paths;
+import java.util.List;
+
 public class AddressTest {
     public void runTests() {
         try (Playwright playwright = Playwright.create()) {
-            Browser browser = playwright.firefox().launch(new BrowserType.LaunchOptions().setHeadless(false)); // Set to false for debugging
+            Browser browser = playwright.firefox().launch(new BrowserType.LaunchOptions().setHeadless(false));
             Page page = browser.newPage();
 
             // Open Suomi.fi
             page.navigate("https://www.suomi.fi/");
-            page.waitForLoadState(LoadState.NETWORKIDLE); // Ensure the page has loaded completely
+            page.waitForLoadState(LoadState.NETWORKIDLE);
 
-            // Search for "asuintalo"
-            page.locator("#search-box").fill("asuintalo"); // Adjust the selector
-            page.locator("#id-main-search-button").click(); // Adjust the selector
+            // Locate all expandable elements on the page (e.g., accordions, sections, etc.)
+            List<Locator> expanders = page.locator(".expander-element").all();  // Adjust selector if necessary
+            System.out.println("Found " + expanders.size() + " expandable elements.");
 
-            // Wait for the search results to load
-            page.waitForSelector("#id-main-search-search-results", new Page.WaitForSelectorOptions().setTimeout(60000));
+            // Loop to expand, capture screenshot, and collapse each Expander element
+            int index = 1;
+            for (Locator expander : expanders) {
+                // Expand the Expander
+                expander.click();
+                page.waitForTimeout(1000); // Wait briefly to allow content to load
 
-            // Click the first search result
-            page.locator("#id-main-search-search-results > li:nth-child(1) > h2 > a").click();
-            page.waitForLoadState(LoadState.DOMCONTENTLOADED); // Wait for the new page to load
+                // Screenshot after expanding
+                expander.screenshot(new Locator.ScreenshotOptions()
+                        .setPath(Paths.get("screenshots/expander_opened_" + index + ".png")));
+                System.out.println("Screenshot saved: expander_opened_" + index + ".png");
 
-            // Capture the address of the first "asuintalo" result
-            String address = "";
-            try {
-                // Wait for the specific element to be visible
-                page.waitForSelector("div.ptv-highlight-box > div > div:nth-child(1) > p", new Page.WaitForSelectorOptions().setTimeout(60000));
+                // Collapse the Expander
+                expander.click();
+                page.waitForTimeout(1000); // Wait briefly to ensure collapse is complete
 
-                // Capture the address text
-                address = page.locator("div.ptv-highlight-box > div > div:nth-child(1) > p").innerText();
-                System.out.println(" " );
-                System.out.println("Extracted Address: " + address);
-            } catch (TimeoutError e) {
-                System.out.println("Could not find the address element within the timeout.");
+                // Screenshot after collapsing
+                expander.screenshot(new Locator.ScreenshotOptions()
+                        .setPath(Paths.get("screenshots/expander_closed_" + index + ".png")));
+                System.out.println("Screenshot saved: expander_closed_" + index + ".png");
+
+
+                index++;
             }
-
-            // Open Posti.fi in a new context to validate the address
-            BrowserContext context = browser.newContext();
-            Page postiPage = context.newPage();
-            postiPage.navigate("https://www.posti.fi/fi/postinumerohaku");
-            postiPage.waitForLoadState(LoadState.NETWORKIDLE); // Ensure the page has loaded completely
-
-            // Fill the address in the search field
-            postiPage.locator("#zipcode-search-bar").fill(address); // Adjust the selector
-            postiPage.locator("#zipcode-search > div > div.searchWrapper-0-1-6 > div > div > div > div > div > div.sc-1ufh44s-7.kKaxEK > button").click(); // Adjust the selector
-            postiPage.waitForLoadState(LoadState.NETWORKIDLE); // Wait for results
-
-            // Validate the address appears in the search results
-            String result = postiPage.locator("#searchResultContainer > div > div > div > table > tbody > tr").innerText(); // Adjust the selector
-            System.out.println("Address validation result: " + result);
-
-            // Check if the result is not empty
-            if (!result.isEmpty()) {
-                System.out.println("Address validation successful.");
-                System.out.println(" " );
-            } else {
-                System.out.println("Address validation failed.");
-            }
-
-            context.close(); // Close the context for the second page
             browser.close(); // Close the browser
         }
     }
