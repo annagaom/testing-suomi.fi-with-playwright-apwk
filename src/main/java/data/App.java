@@ -16,11 +16,6 @@ public class App {
             page.screenshot(new Page.ScreenshotOptions().setPath(Paths.get("example.png")));
         }
 
-        AddressTest addressTest = new AddressTest();
-        addressTest.runTests();
-
-        ExpanderElementsTest expanderElementsTest = new ExpanderElementsTest();
-        expanderElementsTest.runTests();
     }
 
 }

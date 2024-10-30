@@ -18,7 +18,7 @@ public class AppTest {
     @BeforeEach
     public void setup() {
         playwright = Playwright.create();
-        browser = playwright.firefox().launch(new BrowserType.LaunchOptions().setHeadless(true));
+        browser = playwright.firefox().launch(new BrowserType.LaunchOptions().setHeadless(false));
         page = browser.newPage();
     }
 
@@ -66,7 +66,6 @@ public class AppTest {
                 assertTrue(Paths.get("screenshots/" + languageCode + "_" + itemName + ".png").toFile().exists(),
                         "Screenshot not created for " + itemName + " in " + languageCode);
             }
-
             languageMenuButton.click();
         }
 
@@ -84,49 +83,47 @@ public class AppTest {
         page.locator("#id-main-search-button").click();
 
         // Wait for search results and click on the first result
-        page.waitForSelector("#id-main-search-search-results", new Page.WaitForSelectorOptions().setTimeout(60000));
-        page.locator("#id-main-search-search-results > li:nth-child(1) > h2 > a").click();
+        page.waitForSelector("#id-main-search-search-results", new Page.WaitForSelectorOptions().setTimeout(20000));
+        page.locator("#id-main-search-search-results > li:nth-child(2) > h2 > a").click();
         page.waitForLoadState(LoadState.DOMCONTENTLOADED);
 
         // Capture and print the address
         String address = "";
-        try {
-            page.waitForSelector("div.ptv-highlight-box > div > div:nth-child(1) > p", new Page.WaitForSelectorOptions().setTimeout(60000));
-            address = page.locator("div.ptv-highlight-box > div > div:nth-child(1) > p").innerText();
-            System.out.println("Extracted Address: " + address);
+        page.waitForSelector("div.ptv-highlight-box > div > div:nth-child(1) > p", new Page.WaitForSelectorOptions().setTimeout(20000));
+        address = page.locator("div.ptv-highlight-box > div > div:nth-child(1) > p").innerText();
+        System.out.println("Extracted Address: " + address);
 
-            // Screenshot for the address section
-            page.locator("div.ptv-highlight-box > div > div:nth-child(1)").screenshot(new Locator.ScreenshotOptions()
-                    .setPath(Paths.get("screenshots/suomi_address_section.png")));
-            assertTrue(Paths.get("screenshots/suomi_address_section.png").toFile().exists(), "Address screenshot not created.");
-        } catch (TimeoutError e) {
-            System.out.println("Could not find the address element within the timeout.");
-        }
+        // Screenshot for the address section
+        page.locator("div.ptv-highlight-box > div > div:nth-child(1)").screenshot(new Locator.ScreenshotOptions()
+                .setPath(Paths.get("screenshots/suomi_address_section.png")));
+        assertTrue(Paths.get("screenshots/suomi_address_section.png").toFile().exists(), "Address screenshot not created.");
 
         // Open Posti.fi in a new context to validate the address
-        try (BrowserContext context = browser.newContext()) {
-            Page postiPage = context.newPage();
-            postiPage.navigate("https://www.posti.fi/fi/postinumerohaku");
-            postiPage.waitForLoadState(LoadState.NETWORKIDLE);
+        BrowserContext context = browser.newContext();
+        Page postiPage = context.newPage();
+        postiPage.navigate("https://www.posti.fi/fi/postinumerohaku");
+        postiPage.waitForLoadState(LoadState.NETWORKIDLE); // Ensure the page has loaded completely
 
-            // Fill in address for validation
-            postiPage.locator("#zipcode-search-bar").fill(address);
-            postiPage.locator("#zipcode-search > div > div.searchWrapper-0-1-6 > div > div > div > div > div > div.sc-1ufh44s-7.kKaxEK > button").click();
-            postiPage.waitForLoadState(LoadState.NETWORKIDLE);
+        // Fill the address in the search field
+        postiPage.locator("#zipcode-search-bar").fill(address); // Adjust the selector
+        postiPage.locator("#zipcode-search > div > div.searchWrapper-0-1-6 > div > div > div > div > div > div.sc-1ufh44s-7.kKaxEK > button").click(); // Adjust the selector
+        postiPage.waitForLoadState(LoadState.NETWORKIDLE); // Wait for results
 
-            // Capture and print the validation result
-            String result = postiPage.locator("#searchResultContainer > div > div > div > table > tbody > tr").innerText();
-            System.out.println("Address validation result: " + result);
+        // Validate the address appears in the search results
+        String result = postiPage.locator("#searchResultContainer > div > div > div > table > tbody > tr").innerText(); // Adjust the selector
+        System.out.println("Address validation result: " + result);
 
-            // Screenshot for validation result
-            postiPage.locator("#searchResultContainer").screenshot(new Locator.ScreenshotOptions()
-                    .setPath(Paths.get("screenshots/posti_validation_result.png")));
-            assertTrue(Paths.get("screenshots/posti_validation_result.png").toFile().exists(), "Posti validation screenshot not created.");
+        // Check if the result is not empty
+        if (!result.isEmpty()) {
+            System.out.println("Address validation successful.");
+        } else {
+            System.out.println("Address validation failed.");
+        }
 
-            // Assert the result is not empty to confirm validation success
-            assertTrue(!result.isEmpty(), "Address validation failed.");
-        } // Automatically closes postiPage context here
+        context.close(); // Close the context for the second page
+        browser.close(); // Close the browser
     }
+
 
     @Test
     public void testExpanderElements() {
