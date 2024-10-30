@@ -148,11 +148,6 @@ public class AppTest {
                 "All expander elements opened successfully.");
         page.screenshot(new Page.ScreenshotOptions().setPath(Paths.get("screenshots/all_expanders_open.png")));
         System.out.println("Screenshot saved: all_expanders_open.png");
-//        if (!ekaResult.isEmpty() && !tokaResult.isEmpty() && !kolmasResult.isEmpty()) {
-//            System.out.println("All expander elements opened successfully.");
-//        } else {
-//            System.out.println("Failed to open all expander elements.");
-//        }
 
         // Collapse all sections
         page.locator("#main > div:nth-child(2) > div > div > div.col-12.col-lg-8 > div > div.instruction-content-area > div:nth-child(3) > div > button").click();
@@ -165,13 +160,6 @@ public class AppTest {
                 "All expander elements closed successfully.");
         page.screenshot(new Page.ScreenshotOptions().setPath(Paths.get("screenshots/all_expanders_closed.png")));
         System.out.println("Screenshot saved: all_expanders_closed.png");
-
-//        if (ekaResult.isEmpty() && tokaResult.isEmpty() && kolmasResult.isEmpty()) {
-//            System.out.println("All expander elements closed successfully.");
-//
-//        } else {
-//            System.out.println("Failed to close all expander elements.");
-//        }
     }
 
     private void waitForLanguageChange(Page page, String languageCode) {
