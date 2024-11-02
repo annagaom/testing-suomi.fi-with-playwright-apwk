@@ -3,10 +3,8 @@ package data;
 import com.microsoft.playwright.*;
 import com.microsoft.playwright.options.LoadState;
 import org.junit.jupiter.api.*;
-
 import java.nio.file.Paths;
 import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AppTest {
@@ -84,7 +82,7 @@ public class AppTest {
 
         // Wait for search results and click on the first result
         page.waitForSelector("#id-main-search-search-results", new Page.WaitForSelectorOptions().setTimeout(20000));
-        page.locator("#id-main-search-search-results > li:nth-child(2) > h2 > a").click();
+        page.locator("#id-main-search-search-results > li:nth-child(3) > h2 > a").click();
         page.waitForLoadState(LoadState.DOMCONTENTLOADED);
 
         // Capture and print the address
@@ -92,6 +90,7 @@ public class AppTest {
         page.waitForSelector("div.ptv-highlight-box > div > div:nth-child(1) > p", new Page.WaitForSelectorOptions().setTimeout(20000));
         address = page.locator("div.ptv-highlight-box > div > div:nth-child(1) > p").innerText();
         System.out.println("Extracted Address: " + address);
+
 
         // Screenshot for the address section
         page.locator("div.ptv-highlight-box > div > div:nth-child(1)").screenshot(new Locator.ScreenshotOptions()
@@ -113,6 +112,9 @@ public class AppTest {
         String result = postiPage.locator("#searchResultContainer > div > div > div > table > tbody > tr").innerText(); // Adjust the selector
         System.out.println("Address validation result: " + result);
 
+        //screen shot for the address validation
+        postiPage.screenshot(new Page.ScreenshotOptions().setPath(Paths.get("screenshots/posti_address_validation.png")));
+
         // Check if the result is not empty
         if (!result.isEmpty()) {
             System.out.println("Address validation successful.");
@@ -120,10 +122,9 @@ public class AppTest {
             System.out.println("Address validation failed.");
         }
 
-        context.close(); // Close the context for the second page
-        browser.close(); // Close the browser
+        context.close();
+        browser.close();
     }
-
 
     @Test
     public void testExpanderElements() {
@@ -131,14 +132,72 @@ public class AppTest {
         page.navigate("https://www.suomi.fi/ohjeet-ja-tuki/tuki-ja-neuvonta/yritys-suomi-puhelinpalvelu");
         page.waitForLoadState(LoadState.NETWORKIDLE);
 
+        // First expander
+        page.locator("#\\30  > div.sc-9fbwu8-0.cpdacf.sc-1ulzrr5-0.GDXEX.fi-expander_title-button").click();
+        page.waitForFunction("document.querySelector('#\\\\30_content').innerText.trim().length > 0");
+
+        // Verify only first expander content is visible
+        String ekaResult = page.locator("#\\30_content").innerText();
+        String tokaResult = page.locator("#\\31_content").innerText();
+        String kolmasResult = page.locator("#\\32_content").innerText();
+
+        assertTrue(!ekaResult.isEmpty(), "First expander content is visible.");
+        assertTrue(tokaResult.isEmpty(), "Second expander content should not be visible.");
+        assertTrue(kolmasResult.isEmpty(), "Third expander content should not be visible.");
+        page.screenshot(new Page.ScreenshotOptions().setPath(Paths.get("screenshots/first_expander_open.png")));
+        System.out.println("Screenshot saved: first_expander_open.png");
+
+        // Close the first expander
+        page.locator("#\\30  > div.sc-9fbwu8-0.cpdacf.sc-1ulzrr5-0.GDXEX.fi-expander_title-button").click();
+        page.waitForFunction("document.querySelector('#\\\\30_content').innerText.trim().length == 0");
+
+        // Open second expander
+        page.locator("#\\31  > div.sc-9fbwu8-0.cpdacf.sc-1ulzrr5-0.GDXEX.fi-expander_title-button").click();
+        page.waitForFunction("document.querySelector('#\\\\31_content').innerText.trim().length > 0");
+
+        // Verify only second expander content is visible
+        ekaResult = page.locator("#\\30_content").innerText();
+        tokaResult = page.locator("#\\31_content").innerText();
+        kolmasResult = page.locator("#\\32_content").innerText();
+
+        assertTrue(ekaResult.isEmpty(), "First expander content should not be visible.");
+        assertTrue(!tokaResult.isEmpty(), "Second expander content is visible.");
+        assertTrue(kolmasResult.isEmpty(), "Third expander content should not be visible.");
+        page.screenshot(new Page.ScreenshotOptions().setPath(Paths.get("screenshots/second_expander_open.png")));
+        System.out.println("Screenshot saved: second_expander_open.png");
+
+        // Close the second expander
+        page.locator("#\\31  > div.sc-9fbwu8-0.cpdacf.sc-1ulzrr5-0.GDXEX.fi-expander_title-button").click();
+        page.waitForFunction("document.querySelector('#\\\\31_content').innerText.trim().length == 0");
+
+        // Open third expander
+        page.locator("#\\32  > div.sc-9fbwu8-0.cpdacf.sc-1ulzrr5-0.GDXEX.fi-expander_title-button").click();
+        page.waitForFunction("document.querySelector('#\\\\32_content').innerText.trim().length > 0");
+
+        // Verify only third expander content is visible
+        ekaResult = page.locator("#\\30_content").innerText();
+        tokaResult = page.locator("#\\31_content").innerText();
+        kolmasResult = page.locator("#\\32_content").innerText();
+
+        assertTrue(ekaResult.isEmpty(), "First expander content should not be visible.");
+        assertTrue(tokaResult.isEmpty(), "Second expander content should not be visible.");
+        assertTrue(!kolmasResult.isEmpty(), "Third expander content is visible.");
+
+        page.screenshot(new Page.ScreenshotOptions().setPath(Paths.get("screenshots/third_expander_open.png")));
+        System.out.println("Screenshot saved: third_expander_open.png");
+
+        // Close the third expander
+        page.locator("#\\32  > div.sc-9fbwu8-0.cpdacf.sc-1ulzrr5-0.GDXEX.fi-expander_title-button").click();
+        page.waitForFunction("document.querySelector('#\\\\32_content').innerText.trim().length == 0");
+
         // Expand all sections
         page.locator("#main > div:nth-child(2) > div > div > div.col-12.col-lg-8 > div > div.instruction-content-area > div:nth-child(3) > div > button").click();
         page.waitForLoadState(LoadState.NETWORKIDLE);
 
         // Retrieve text from expanded sections
-        String ekaResult = page.locator("#\\30 _content > div > div > p").innerText();
-        String tokaResult = page.locator("#\\31 _content > div > div > p:nth-child(1)").innerText();
-        String kolmasResult = page.locator("#\\32 _content > div > div > p:nth-child(1)").innerText();
+         ekaResult = page.locator("#\\30 _content > div > div > p").innerText();
+         tokaResult = page.locator("#\\31 _content > div > div > p:nth-child(1)").innerText();
+         kolmasResult = page.locator("#\\32 _content > div > div > p:nth-child(1)").innerText();
 
         // Check results of expansion
         assertTrue(!ekaResult.isEmpty() && !tokaResult.isEmpty() && !kolmasResult.isEmpty(),
@@ -163,3 +222,7 @@ public class AppTest {
         page.waitForFunction("document.documentElement.lang === '" + languageCode + "'");
     }
 }
+
+
+
+
