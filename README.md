@@ -7,14 +7,12 @@
 - Kaisla
 
 ## Project Overview
-1. 
-2. This project uses Playwright for testing, specifically targeting `suomi.fi` for searching "asuintalo" details and verifying addresses with `posti.fi`.
-3.
+This project uses Playwright for testing, specifically targeting `suomi.fi` for searching "asuintalo" details and verifying addresses with `posti.fi`.
 
 ### Setup Instructions
 1. Clone the repository.
 ```
-git clone http://
+git clone https://gitlab.metropolia.fi/annagao/testing-suomi.fi-with-playwright-apwk
 ``'
 2. Tarkista ja asennetaan dependencies:
 
